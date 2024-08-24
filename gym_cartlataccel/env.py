@@ -22,7 +22,7 @@ class CartLatAccelEnv(gym.Env):
     "render_fps": 50,
   }
 
-  def __init__(self, render_mode: str = None, noise_mode: str = None, moving_target: bool = True, env_bs: int = 1000):
+  def __init__(self, render_mode: str = None, noise_mode: str = None, moving_target: bool = True, env_bs: int = 1):
     self.force_mag = 10.0 # steer -> accel
     self.tau = 0.02  # Time step
     self.max_u = 10.0 # steer/action
