@@ -132,26 +132,24 @@ class PPO:
 
     return self.model.actor, self.hist
 
-def train(env, max_evals=10000, seed=None):
-  ppo = PPO(env, model)
-  return ppo.train(max_evals=max_evals)
-  return model.actor, hist
-
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--max_evals", type=int, default=30000)
+  parser.add_argument("--env_bs", type=int, default=1000)
   parser.add_argument("--save_model", default=False)
   parser.add_argument("--noise_mode", default=None)
   args = parser.parse_args()
 
   print(f"training ppo with max_evals {args.max_evals}") 
-  env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode)
+  env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=args.env_bs)
   model = ActorCritic(env.observation_space.shape[-1], {"pi": [32], "vf": [32]}, env.action_space.shape[-1])
   ppo = PPO(env, model)
   best_model, hist = ppo.train(args.max_evals)
-  # env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, render_mode="human")
+
+  print(f"rolling out best model") 
+  env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=1, render_mode="human")
   states, actions, rewards, dones, next_state= ppo.rollout(env, best_model, deterministic=True)
-  print(f"avg reward {np.mean(sum(rewards))}")
+  print(f"reward {sum(rewards)}")
 
   if args.save_model:
     os.makedirs('out', exist_ok=True)
