@@ -2,8 +2,6 @@
 
 A simple, vectorized cart environment for testing RL controls on OpenAI Gym.
 
-Custom PPO implement solves in <1s running ~1M steps, using a batch size of 1k.
-
 ## Installation
 
 `pip install --user git+https://github.com/ellenjxu/gym-cartlataccel`
@@ -14,11 +12,14 @@ Custom PPO implement solves in <1s running ~1M steps, using a batch size of 1k.
 
 ## Usage
 
-```
+```python
 import gymnasium as gym
 import gym_cartlataccel
 
 env = gym.make("CartLatAccel-v0")
 ```
 
-`python ppo.py`
+custom PPO solves in <1s running ~1M steps, using a batch size of 1k: `python ppo.py`
+
+
+![cartlataccel](https://github.com/user-attachments/assets/7c9e5570-bb28-4276-9bda-c1ff84ce7448)
