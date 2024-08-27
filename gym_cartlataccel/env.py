@@ -5,7 +5,7 @@ from gymnasium import spaces
 from scipy.interpolate import interp1d
 from gym_cartlataccel.noise import SimNoise
 
-class CartLatAccelEnv(gym.Env):
+class BatchedCartLatAccelEnv(gym.Env):
   """
   Batched CartLatAccel env
 
