@@ -25,7 +25,7 @@ env = gym.make("CartLatAccel-v0")
 
 set noise_mode in env.py.
 
-custom PPO solves in <1s running ~1M steps, using a batch size of 1k: `python ppo.py`
+custom PPO solves in <1s running ~1M steps, using a batch size of 1k: `python ppo.py`. Runs in 0.6s on single A2000 GPU.
 
 
 ![cartlataccel](https://github.com/user-attachments/assets/7c9e5570-bb28-4276-9bda-c1ff84ce7448)
