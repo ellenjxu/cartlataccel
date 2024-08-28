@@ -11,7 +11,7 @@ from tensordict import TensorDict
 from model import ActorCritic
 
 class PPO:
-  def __init__(self, env, model, lr=1e-1, gamma=0.99, lam=0.95, clip_range=0.2, epochs=1, n_steps=30, ent_coeff=0.01, bs=30, device='cuda'):
+  def __init__(self, env, model, lr=1e-1, gamma=0.99, lam=0.95, clip_range=0.2, epochs=1, n_steps=30, ent_coeff=0.01, bs=30, device='cuda', debug=False):
     self.env = env
     self.model = model.to(device)
     self.gamma = gamma
@@ -22,9 +22,11 @@ class PPO:
     self.ent_coeff = ent_coeff
     self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
     self.replay_buffer = ReplayBuffer(storage=LazyTensorStorage(max_size=10000, device=device), batch_size=bs)
+    self.bs = bs
     self.hist = []
     self.start = time.time()
     self.device = device
+    self.debug = debug
 
   def compute_gae(self, rewards, values, done, next_value):
     returns, advantages = np.zeros_like(rewards), np.zeros_like(rewards)
@@ -38,7 +40,7 @@ class PPO:
     return returns, advantages
 
   def evaluate_cost(self, states, actions, returns, advantages, logprob):
-    new_logprob = self.model.actor.get_logprob(states, actions).permute(1,2,0)
+    new_logprob = self.model.actor.get_logprob(states, actions)
     entropy = (torch.log(self.model.actor.std) + 0.5 * (1 + torch.log(torch.tensor(2 * torch.pi)))).sum(dim=-1)
     ratio = torch.exp(new_logprob-logprob).squeeze()
     surr1 = ratio * advantages
@@ -82,11 +84,11 @@ class PPO:
         state_tensor = torch.FloatTensor(np.array(states)).to(self.device)
         next_state_tensor = torch.FloatTensor(next_state).to(self.device)
         action_tensor = torch.FloatTensor(np.array(actions)).to(self.device)
-        values = self.model.critic(state_tensor.permute(1,0,2)).permute(1,0,2).cpu().numpy().squeeze()
+        values = self.model.critic(state_tensor).cpu().numpy().squeeze()
         next_values = self.model.critic(next_state_tensor).cpu().numpy().squeeze()
 
         self.model.actor.std = self.model.actor.log_std.exp().to(self.device) # update std
-        logprobs_tensor = self.model.actor.get_logprob(state_tensor, action_tensor).permute(1,2,0)
+        logprobs_tensor = self.model.actor.get_logprob(state_tensor, action_tensor).cpu().numpy().squeeze()
 
       returns, advantages = self.compute_gae(np.array(rewards), values, np.array(dones), next_values)
       gae_time = time.perf_counter()-start
@@ -120,7 +122,16 @@ class PPO:
       self.replay_buffer.empty() # clear buffer
       update_time = time.perf_counter() - start
 
-      eps += self.env.bs # cartlataccel env bs
+      # debug info
+      if self.debug:
+        print(f"critic loss {costs['critic'].item():.3f} entropy {costs['entropy'].item():.3f} mean action {np.mean(abs(np.array(actions)))}")
+        print(f"Runtimes: rollout {rollout_time:.3f}, gae {gae_time:.3f}, buffer {buffer_time:.3f}, update {update_time:.3f}")
+
+      eps += 1000 # cartlataccel env bs
+      avg_reward = np.sum(rewards)/1000
+      self.hist.append((eps, avg_reward))
+      print(f"eps {eps:.2f}, reward {avg_reward:.3f}, t {time.time()-self.start:.2f}")
+
       if eps > max_evals:
         print(f"Total time: {time.time() - self.start}")
         break
@@ -148,7 +159,7 @@ if __name__ == "__main__":
 
   print(f"rolling out best model") 
   env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=1, render_mode="human")
-  states, actions, rewards, dones, next_state= ppo.rollout(env, best_model, deterministic=True)
+  states, actions, rewards, dones, next_state= ppo.rollout(env, best_model, max_steps=200, deterministic=True)
   print(f"reward {sum(rewards)}")
 
   if args.save_model:
