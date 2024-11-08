@@ -11,8 +11,9 @@ from tensordict import TensorDict
 from model import ActorCritic
 
 class PPO:
-  def __init__(self, env, model, lr=1e-1, gamma=0.99, lam=0.95, clip_range=0.2, epochs=1, n_steps=30, ent_coeff=0.01, bs=30, device='cuda', debug=False):
+  def __init__(self, env, model, lr=1e-1, gamma=0.99, lam=0.95, clip_range=0.2, epochs=1, n_steps=30, ent_coeff=0.01, bs=30, env_bs=1, device='cuda', debug=False):
     self.env = env
+    self.env_bs = env_bs
     self.model = model.to(device)
     self.gamma = gamma
     self.lam = lam
@@ -127,16 +128,13 @@ class PPO:
         print(f"critic loss {costs['critic'].item():.3f} entropy {costs['entropy'].item():.3f} mean action {np.mean(abs(np.array(actions)))}")
         print(f"Runtimes: rollout {rollout_time:.3f}, gae {gae_time:.3f}, buffer {buffer_time:.3f}, update {update_time:.3f}")
 
-      eps += 1000 # cartlataccel env bs
-      avg_reward = np.sum(rewards)/1000
-      self.hist.append((eps, avg_reward))
-      print(f"eps {eps:.2f}, reward {avg_reward:.3f}, t {time.time()-self.start:.2f}")
+      eps += self.env_bs
+      avg_reward = np.sum(rewards)/self.env_bs
 
       if eps > max_evals:
         print(f"Total time: {time.time() - self.start}")
         break
       else:
-        avg_reward = np.sum(rewards)/self.env.bs
         print(f"eps {eps:.2f}, reward {avg_reward:.3f}, t {time.time()-self.start:.2f}")
         print(f"Runtimes: rollout {rollout_time:.3f}, gae {gae_time:.3f}, buffer {buffer_time:.3f}, update {update_time:.3f}")
         self.hist.append((eps, avg_reward))
@@ -154,7 +152,7 @@ if __name__ == "__main__":
   print(f"training ppo with max_evals {args.max_evals}") 
   env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=args.env_bs)
   model = ActorCritic(env.observation_space.shape[-1], {"pi": [32], "vf": [32]}, env.action_space.shape[-1])
-  ppo = PPO(env, model)
+  ppo = PPO(env, model, env_bs=args.env_bs)
   best_model, hist = ppo.train(args.max_evals)
 
   print(f"rolling out best model") 
