@@ -151,13 +151,13 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   print(f"training ppo with max_evals {args.max_evals}") 
-  env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=args.env_bs)
+  env = gym.make("CartLatAccel-v1", noise_mode=args.noise_mode, env_bs=args.env_bs)
   model = ActorCritic(env.observation_space.shape[-1], {"pi": [32], "vf": [32]}, env.action_space.shape[-1])
   ppo = PPO(env, model, env_bs=args.env_bs)
   best_model, hist = ppo.train(args.max_evals)
 
   print(f"rolling out best model") 
-  env = gym.make("CartLatAccel-v0", noise_mode=args.noise_mode, env_bs=1, render_mode="human")
+  env = gym.make("CartLatAccel-v1", noise_mode=args.noise_mode, env_bs=1, render_mode="human")
   states, actions, rewards, dones, next_state= ppo.rollout(env, best_model, max_steps=200, deterministic=True)
   print(f"reward {sum(rewards)}")
 
