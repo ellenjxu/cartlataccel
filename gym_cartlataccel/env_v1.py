@@ -11,7 +11,7 @@ class BatchedCartLatAccelEnv(gym.Env):
 
   Action space: ndarray shape (bs,) representing accel applied to cart
   Observation space: ndarray shape (bs, 3) with cart state and target, [pos, velocity, target_pos]
-  Rewards: r = -error/500, where error is abs x-x_target. Scaled to (-10,0)
+  Rewards: r = -error/x_max, where error is abs x-x_target. Scaled to [-1,+1] per timestep
 
   Starting state: random state in obs space
   Episode truncation: 500 timesteps

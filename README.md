@@ -22,7 +22,7 @@ The only inputs are x, v, and x_target, and the action is the steering force/acc
 import gymnasium as gym
 import gym_cartlataccel
 
-env = gym.make("CartLatAccel-v0")
+env = gym.make("CartLatAccel-v1")
 ```
 
 set noise_mode in env.py.
@@ -38,3 +38,7 @@ reward [-0.35961219]
 ```
 
 ![cartlataccel](https://github.com/user-attachments/assets/7c9e5570-bb28-4276-9bda-c1ff84ce7448)
+
+---
+
+Version 1.1 (2024-11-12): fixed normalization for rewards so now outputs (-1,+1) per timestep
