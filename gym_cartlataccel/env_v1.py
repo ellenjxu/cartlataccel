@@ -82,6 +82,8 @@ class BatchedCartLatAccelEnv(gym.Env):
     self.curr_step = 0
     if self.render_mode == "human":
       self.render()
+    if self.bs == 1:
+      return self.state[0], {}
     return np.array(self.state, dtype=np.float32), {}
 
   def step(self, action):
@@ -107,6 +109,8 @@ class BatchedCartLatAccelEnv(gym.Env):
     self.curr_step += 1
     truncated = self.curr_step >= self.max_episode_steps
     info = {"action": action, "noisy_action": noisy_action, "x": new_x, "x_target": new_x_target}
+    if self.bs == 1:
+      return self.state[0], float(reward), False, truncated, info
     return np.array(self.state, dtype=np.float32), reward, False, truncated, info
 
   def render(self):
