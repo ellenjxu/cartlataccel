@@ -23,7 +23,7 @@ class CartLatAccelEnv(gym.Env):
   }
 
   def __init__(self, render_mode: str = None, noise_mode: str = None, moving_target: bool = True, env_bs: int = 1):
-    self.force_mag = 10.0 # steer -> accel
+    self.force_mag = 50.0 # steer -> accel
     self.tau = 0.02  # Time step
     self.max_u = 1.0 # steer/action
     self.max_v = 5.0 # init small v
@@ -71,7 +71,7 @@ class CartLatAccelEnv(gym.Env):
       low=[-self.max_x_frame, -self.max_v, -self.max_x_frame],
       high=[self.max_x_frame, self.max_v, self.max_x_frame],
       size=(self.bs, 3)
-    )
+    ).astype(np.float32)
 
     if self.moving_target:
       self.x_targets = self.generate_traj(self.bs)
@@ -84,7 +84,7 @@ class CartLatAccelEnv(gym.Env):
       self.render()
     if self.bs == 1:
       return self.state[0], {}
-    return np.array(self.state, dtype=np.float32), {}
+    return self.state, {}
 
   def step(self, action):
     x = self.state[:,0]
@@ -99,7 +99,7 @@ class CartLatAccelEnv(gym.Env):
     new_v = new_a * self.tau + v
     new_x_target = self.x_targets[:, self.curr_step]
 
-    self.state = np.stack([new_x, new_v, new_x_target], axis=1)
+    self.state = np.stack([new_x, new_v, new_x_target], axis=1).astype(np.float32)
 
     error = abs(new_x - new_x_target)
     reward = -error/self.max_x # scale reward, now between -1,1 for each timestep
@@ -111,8 +111,8 @@ class CartLatAccelEnv(gym.Env):
     truncated = self.curr_step >= self.max_episode_steps
     info = {"action": action, "noisy_action": noisy_action, "x": new_x, "x_target": new_x_target}
     if self.bs == 1:
-      return self.state[0], float(reward[0]), False, truncated, info
-    return np.array(self.state, dtype=np.float32), reward, False, truncated, info
+      return self.state[0], reward[0], False, truncated, info
+    return self.state, reward, False, truncated, info
 
   def render(self):
     if self.screen is None:

@@ -166,6 +166,7 @@ if __name__ == "__main__":
   states, actions, rewards, dones, next_state= ppo.rollout(env, best_model, max_steps=200, deterministic=True)
   rollout_time = time.time() - start
   print(f"reward {sum(rewards)}")
+  print(f"mean action {np.mean(abs(np.array(actions)))}")
   print(f"train time {train_time}, rollout {rollout_time}")
 
   if args.save_model:
