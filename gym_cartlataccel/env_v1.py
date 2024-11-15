@@ -5,7 +5,7 @@ from gymnasium import spaces
 from scipy.interpolate import interp1d
 from gym_cartlataccel.noise import SimNoise
 
-class BatchedCartLatAccelEnv(gym.Env):
+class CartLatAccelEnv(gym.Env):
   """
   Batched CartLatAccel env
 
@@ -25,7 +25,7 @@ class BatchedCartLatAccelEnv(gym.Env):
   def __init__(self, render_mode: str = None, noise_mode: str = None, moving_target: bool = True, env_bs: int = 1):
     self.force_mag = 10.0 # steer -> accel
     self.tau = 0.02  # Time step
-    self.max_u = 10.0 # steer/action
+    self.max_u = 1.0 # steer/action
     self.max_v = 5.0 # init small v
     self.max_x = 10.0 # max x to clip
     self.max_x_frame = 2.2 # size of render frame
@@ -90,6 +90,7 @@ class BatchedCartLatAccelEnv(gym.Env):
     x = self.state[:,0]
     v = self.state[:,1]
     action = action.squeeze()
+    # action = np.clip(action, -self.max_u, self.max_u)
     noisy_action = self.noise_model.add_lat_noise(self.curr_step, action)
 
     new_a = noisy_action * self.force_mag # steer * force
@@ -110,7 +111,7 @@ class BatchedCartLatAccelEnv(gym.Env):
     truncated = self.curr_step >= self.max_episode_steps
     info = {"action": action, "noisy_action": noisy_action, "x": new_x, "x_target": new_x_target}
     if self.bs == 1:
-      return self.state[0], float(reward), False, truncated, info
+      return self.state[0], float(reward[0]), False, truncated, info
     return np.array(self.state, dtype=np.float32), reward, False, truncated, info
 
   def render(self):
