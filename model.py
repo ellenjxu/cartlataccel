@@ -21,6 +21,7 @@ class MLPGaussian(nn.Module):
 
   def get_action(self, obs: torch.Tensor, deterministic=False):
     mean = self.forward(obs)
+    mean = torch.tanh(mean) # action is between -1,1
     action = mean[0] if deterministic else torch.normal(mean, self.std)[0]
     return action.detach().cpu().numpy()
 

@@ -90,7 +90,7 @@ class CartLatAccelEnv(gym.Env):
     x = self.state[:,0]
     v = self.state[:,1]
     action = action.squeeze()
-    # action = np.clip(action, -self.max_u, self.max_u)
+    action = np.clip(action, -self.max_u, self.max_u)
     noisy_action = self.noise_model.add_lat_noise(self.curr_step, action)
 
     new_a = noisy_action * self.force_mag # steer * force

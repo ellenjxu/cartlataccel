@@ -7,5 +7,5 @@ register(
 
 register(
   id="CartLatAccel-v1",
-  entry_point="gym_cartlataccel.env_v1:BatchedCartLatAccelEnv"
+  entry_point="gym_cartlataccel.env_v1:CartLatAccelEnv"
 )

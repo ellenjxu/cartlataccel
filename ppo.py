@@ -149,13 +149,14 @@ if __name__ == "__main__":
   parser.add_argument("--save_model", default=False)
   parser.add_argument("--noise_mode", default=None)
   parser.add_argument("--render", type=str, default="human")
+  parser.add_argument("--debug", default=False)
   args = parser.parse_args()
 
   print(f"training ppo with max_evals {args.max_evals}") 
   start = time.time()
   env = gym.make("CartLatAccel-v1", noise_mode=args.noise_mode, env_bs=args.env_bs)
   model = ActorCritic(env.observation_space.shape[-1], {"pi": [32], "vf": [32]}, env.action_space.shape[-1])
-  ppo = PPO(env, model, env_bs=args.env_bs)
+  ppo = PPO(env, model, env_bs=args.env_bs, debug=args.debug)
   best_model, hist = ppo.train(args.max_evals)
   train_time = time.time() - start
 
