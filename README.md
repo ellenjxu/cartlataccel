@@ -39,4 +39,4 @@ reward [-0.35961219]
 
 ---
 
-Version 1.1 (2024-11-12): fixed normalization for rewards so now outputs (-1,+1) per timestep
+Version 1.1 (2024-11-12): fixed normalization for reward, action space so now (-1,1) per timestep. Added action clipping to -1,1
