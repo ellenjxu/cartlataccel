@@ -2,9 +2,7 @@
 
 RL learns to drive a (very simple) car in <1s!
 
-This task is a very simple, vectorized cart dynamics environment for testing RL driving controls. Think CartPole, but for [driving controls](https://github.com/commaai/controls_challenge).
-
-The env is CartPole steering without the pole, with added realistic noise and trajectory following.
+CartLatAccel is a simple 1D controls environment with added realistic noise and trajectory following. This task is a very simple, vectorized cart dynamics environment for testing RL [driving controls](https://github.com/commaai/controls_challenge). Think CartPole but without the pole!
 
 The only inputs are x, v, and x_target, and the action is the steering force/accel.
 
