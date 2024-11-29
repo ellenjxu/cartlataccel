@@ -12,7 +12,6 @@ class SimNoise:
     self.n = n
     assert fps is not None
     self.fps = fps
-    np.random.seed(seed)
 
     params = get_no_noise_params()
     if noise_mode == "REALISTIC":
@@ -38,9 +37,11 @@ class SimNoise:
     self.lat_action_noise = np.random.normal(0.0, params['lat_action'], size=self.n)
     self.lat_action_noise = self.correlate_noise(self.lat_action_noise)
 
-    self.reset()
+    self.reset(seed)  
 
-  def reset(self, init_accel=0.):
+  def reset(self, seed=None):
+    if seed is not None:
+      np.random.seed(seed)
     # scale the lag to be in [0, lag*FPS]
     lat_lag_frames = int(self.lag / self.params['lag'] * (int(self.fps*self.params['lag']) + 1)) if self.params['lag'] > 0 else 0
     self.lats = [0 for _ in range(lat_lag_frames)]

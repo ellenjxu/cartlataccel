@@ -54,6 +54,7 @@ class CartLatAccelEnv(gym.Env):
     self.noise_mode = noise_mode
     self.moving_target = moving_target
 
+    self.noise_model = SimNoise(self.max_episode_steps, 1/self.tau, self.noise_mode, seed=42)
     np.random.seed(42)
 
   def generate_traj(self, n_traj=1, n_points=10):
@@ -77,7 +78,7 @@ class CartLatAccelEnv(gym.Env):
       self.x_targets = self.generate_traj(self.bs)
     else:
       self.x_targets = np.full((self.bs, self.max_episode_steps), self.state[-1]) # fixed target
-    self.noise_model = SimNoise(self.max_episode_steps, 1/self.tau, self.noise_mode, seed=seed)
+    self.noise_model.reset(seed)
 
     self.curr_step = 0
     if self.render_mode == "human":
